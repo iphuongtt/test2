@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<HTML>
+	<head>
+		<script type="text/javascript" src = "Ball.js"></script>
+		<script>
+			var _canvas;
+			var _context;
+			var _ball;
+			var _balls = [];
+			var _reqAnimation;
+			function draw(){
+				_context.clearRect(0, 0, _canvas.width, _canvas.height);
+				for(var i = 0; i < _balls.length; i++){
+					_balls[i].draw(_context, (i+1)*0.1);
+				}
+			}
+
+			function update(){
+				_ball.move();
+				_ball.checkCollision();
+				draw();
+				_reqAnimation(update);
+			}
+
+			function traceBall(ball){
+				var b = new Ball;
+				b.cx = ball.cx;
+				b.cy = ball.cy;
+				_balls.push(b);
+				if(_balls.length > 10)
+					_balls.splice(0, 1);
+				_reqAnimation(traceBall);
+			}
+
+			window.onload = function(){
+				var interval = 10;
+				_canvas = document.getElementById('canvas');
+				_context = _canvas.getContext("2d");
+				_ball = new Ball(_canvas.width, _canvas.height);
+				_reqAnimation = window.requestAnimationFrame 	||
+								window.mozRequestAnimationFrame	||
+								window.webkitRequestAnimationFrame	||
+								window.msRequestAnimationFrame		||
+								window.oRequestAnimationFrame		;
+				if(_reqAnimation){
+					update();
+					traceBall(_ball);
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="canvas" width="500px" height="500px" style="border: 1px solid;margin: auto;" tabindex = "1"></canvas>
+	</body>
+</HTML>

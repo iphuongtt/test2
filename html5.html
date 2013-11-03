@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<script type="text/javascript">
+			sessionStorage.myVariable="Hello. ";
+			localStorage.myVariable="Nice to meet you!";
+			document.write(sessionStorage.myVariable);
+			document.write(localStorage.myVariable);
+		</script>
+		<button onclick="changeValue();">Change Value</button>
+		<script type="text/javascript">
+			localStorage.clear();
+			console.log(localStorage);
+			if (window.addEventListener)
+				window.addEventListener('storage', storage_event, false);
+			else if (window.attachEvent) // IE
+				window.attachEvent('onstorage', storage_event, false);
+			function storage_event(event){
+				alert('change');
+				console.log(event);
+
+			}
+			function changeValue(){
+				localStorage.myValue=Math.random();
+			}
+		</script>
+		<script type="text/javascript">
+			var db = openDatabase("mydb", "1.0", "My First DB", 5 * 1024 * 1024);
+			db.readTransaction(function (tx) {
+				tx.executeSql("CREATE TABLE IF NOT EXISTS CUSTOMERS(id unique, name)");
+				tx.executeSql("INSERT INTO CUSTOMERS (id, name) VALUES (?,?)", [1,"peter"]);
+				tx.executeSql("INSERT INTO CUSTOMERS (id, name) VALUES (?,?)", [2,"paul"]);
+			});
+		</script>
+
+		<input type="text" id="username" value="2" />
+		<br />
+		<button id="button1">Submit</button>
+		<script type="text/javascript">
+			worker = new Worker("mytask.js");
+			worker.onmessage= function (event) {
+				alert(event.data);
+			};
+			document.getElementById("button1").onclick = function() {
+				var name = document.getElementById("username").value;
+				worker.postMessage(name);
+			};
+		</script>
+	</body>
+</html>

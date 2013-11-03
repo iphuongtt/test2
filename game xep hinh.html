@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<HTML>
+	<head>
+		<script>
+			window.onload = function(){
+				_canvas = document.getElementById("canvas");
+				_context = canvas.getContext("2d");
+				_img = new Image();
+				_cellList = new cellList;
+				_ismoving = false;
+				_keyPressed = [];
+				const AVARIABLE_KEYS = [
+					Keys.UP_ARROW,
+					Keys.DOWN_ARROW,
+					Keys.LEFT_ARROW,
+					Keys.RIGHT_ARROW
+				];
+				_img.onload = function(){
+					splitImg(_img,4,4,_context);
+				};
+				_img.src = "foo.png";
+				_canvas.onmousedown = function(e){
+					canvas_mousedown(e);
+				}
+				_canvas.onmousemove = function(e){
+					canvas_mousemove(e);
+				}
+				_canvas.onmouseup = function(e){
+					canvas_mouseup(e);
+				}
+				_canvas.onkeydown = function(e){
+					alert(e.keyCode)
+				}
+			}
+
+			function splitImg(img, row, col, context){
+				var cellW = img.width/col;
+				var cellH = img.height/row;
+				var ranI = 0, ranJ = 0;
+				var arrRanI = [], arrRanJ = [];
+				for(var i = 0; i < row; i++)
+					arrRanI.push(i);
+				for(var j = 0; j < col; j++)
+					arrRanJ.push(j);
+				arrRanI.sort(function(){return 0.5 - Math.random();});
+				arrRanJ.sort(function(){return 0.5 - Math.random();});
+				for(var i = 0; i < row; i++){
+					for(var j = 0; j < col; j++){
+						_context.drawImage(img, j*cellW, i*cellH ,cellW,cellH, arrRanJ[j]*cellW, arrRanI[i]*cellH ,cellW,cellH);
+						
+						var imgData=_context.getImageData(arrRanJ[j]*cellW, arrRanI[i]*cellH, cellW, cellH);
+						var cell = new cells(arrRanJ[j]*cellW, arrRanI[i]*cellH, cellW, cellH, j*cellW, i*cellH, imgData);
+						_cellList.addCell(cell);
+						_context.strokeRect(j*cellW, i*cellH ,cellW,cellH);
+					}
+				}
+			}
+			function canvas_mousedown(e){
+				if(_cellList.cell){					
+					_cellList.cell.selected = false;
+					_cellList.cell = null;
+				}
+				var x = e.pageX - _canvas.offsetLeft;
+				var y = e.pageY - _canvas.offsetTop;
+				for(var i =0; i < _cellList.cells.length; i++){
+					if(_cellList.cells[i].isContaint(x, y)){
+						_cellList.cells[i].selected = true;
+						_ismoving = true;
+						_cellList.cell = _cellList.cells[i];
+						_cellList.offsetX = x - _cellList.cells[i].x;
+						_cellList.offsetY = y - _cellList.cells[i].y;
+						break;
+					}
+				}
+				//draw();
+			}
+
+			function canvas_mousemove(e){
+				var x = e.pageX - _canvas.offsetLeft;
+				var y = e.pageY - _canvas.offsetTop;
+				if(_ismoving && _cellList.cell){
+					_cellList.cell.x = x - _cellList.offsetX;
+					_cellList.cell.y = y - _cellList.offsetY;
+					draw();
+				}
+			}
+
+			function canvas_keydown(e){
+				if(AVARIABLE_KEYS.indexOf(e.keyCode) != -1)
+					_keyPressed[e.keyCode] = true;
+			}
+
+			function canvas_keyup(e){
+				if(_keyPressed[e.keyCode])
+					_keyPressed[e.keyCode] = false;
+			}
+
+			function draw(){
+				_canvas.width = _canvas.width;
+				for (var i = _cellList.cells.length-1;i>=0; i--) {
+					_context.putImageData(_cellList.cells[i].imageData,_cellList.cells[i].x, _cellList.cells[i].y);
+				}
+			}
+
+			function canvas_mouseup(e){
+				_ismoving = false;
+			}
+			/**
+			* @author: Trinh Thanh Phuong
+			* @since: 27/10/2013
+			* @todo: Lop luu cac hinh anh da bi cat ra
+			* @param:
+			* @return:
+			*/
+			function cells(x, y, w, h, correctX, correctY, imgData){
+				this.x = x;
+				this.y = y;
+				this.w = w;
+				this.h = h;
+				this.selected = false;
+				this.correct = 0;
+				this.correctX = correctX;
+				this.correctY = correctY;
+				this.imageData = imgData;
+			}
+
+			/**
+			* @author: Trinh Thanh Phuong
+			* @since:
+			* @todo: Kiem tra vi tri hien tai thuoc cell nao
+			* @param:
+			* @return:
+			*/
+			cells.prototype.isContaint = function(x, y){
+				var r = this.x + this.w;
+				var b = this.y + this.h;
+				return x > this.x && x < r && y > this.y && y < b;
+			}
+
+
+			function cellList(){
+				this.cell = null;
+				this.cells = [];
+				this.offsetX = 0;
+				this.offsetY = 0;
+			}
+
+			cellList.prototype.addCell = function(cell){
+				this.cells.push(cell);
+			}
+			cellList.prototype.selectAt = function(x, y){
+				if(this.cell){
+					this.cell = null;
+					this.cell.selected = false;
+				}
+				for(var i = 0; i < this.cells.length; i++){
+					if(this.cells[i].isContaint(x, y)){
+						this.offsetX = x - this.cells[i].x;
+						this.offsetY = y - this.cells[i].y;
+						this.cell = this.cells[i];
+						this.cell[i].selected = true;
+					}
+				}
+			}
+
+
+
+		</script>
+	</head>
+	<body>
+		<canvas id="canvas" width="500px" height="800px" style="border: 1px solid;margin: auto;" tabindex = "1"></canvas>
+	</body>
+</HTML>
