@@ -1,6 +1,7 @@
 function Line(){
 	this.p1 = null;
 	this.p2 = null;
+	
 }
 
 Line.prototype.getVector = function(){
